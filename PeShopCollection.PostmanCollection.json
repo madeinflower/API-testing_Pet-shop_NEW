@@ -1,0 +1,759 @@
+{
+	"info": {
+		"_postman_id": "59afb887-bcf5-4ded-823b-5a116da83966",
+		"name": "Pet shop collection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "22558597"
+	},
+	"item": [
+		{
+			"name": "Pet CRUD",
+			"item": [
+				{
+					"name": "Add new pet to the store",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 500ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(500);",
+									"});",
+									"console.log(pm.response);",
+									"",
+									"var jsonData = pm.response.json();",
+									"pm.test(\"Status check\", function () {",
+									"    pm.expect(jsonData.status).to.eql(\"available\");",
+									"});",
+									"",
+									"pm.test(\"ID of pet is correct\", function () {",
+									"pm.expect(jsonData.id).to.eql(parseInt(pm.environment.get(\"PET_ID\")))",
+									"});",
+									"",
+									"pm.test(\"Name of pet is correct\", function () {",
+									"pm.expect(jsonData.name).to.eql(pm.environment.get(\"PET_NAME\"))",
+									"});",
+									"",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var PET_ID = pm.variables.replaceIn('{{$randomInt}}');",
+									"var PET_CATEGORY_ID = pm.variables.replaceIn('{{$randomInt}}');",
+									"var PET_CATEGORY_NAME = pm.variables.replaceIn('{{$randomColor}}');",
+									"var PET_NAME = pm.variables.replaceIn('{{$randomFirstName}}');",
+									"// - почему не генерирует рандомные ссылки? :",
+									"var PET_photoUrls = pm.variables.replaceIn('{{$randomImageUrl}}');",
+									"var PET_TAG_ID = pm.variables.replaceIn('{{$randomInt}}');",
+									"var PET_TAG_NAME = pm.variables.replaceIn('{{$randomAbbreviation}}');",
+									"",
+									"pm.environment.set(\"PET_ID\", parseInt(PET_ID));",
+									"pm.environment.set(\"PET_CATEGORY_ID\", parseInt(PET_CATEGORY_ID));",
+									"pm.environment.set(\"PET_CATEGORY_NAME\", (PET_CATEGORY_NAME));",
+									"pm.environment.set(\"PET_NAME\", (PET_NAME));",
+									"// - почему не генерирует рандомные ссылки? :",
+									"pm.environment.set(\"PET_photoUrls\", (PET_photoUrls)); ",
+									"pm.environment.set(\"PET_TAG_ID\", parseInt(PET_TAG_ID));",
+									"pm.environment.set(\"PET_TAG_NAME\", (PET_TAG_NAME));",
+									"",
+									"// Another way of random values (PET_ID and PET_NAME) generation:",
+									"// pm.environment.set(\"PET_ID\", Math.floor(Math.random() * 1000)); // generation of random value between 0 and 999 and saving it in PET_ID variable in the environment",
+									"// pm.environment.set(\"PET_NAME\", \"Pet-\" + Math.floor(Math.random() * 100)); // generation of random value between 0 and 999 and adding it to the \"Pet-\" string for the PET_NAME creation",
+									"",
+									"// Функция для генерации случайного элемента из массива для генерации статуса pet",
+									"function getRandomItemFromArray(array) {",
+									"    return array[Math.floor(Math.random() * array.length)];",
+									"}",
+									"// Возможные статусы",
+									"const statuses = [\"available\", \"pending\", \"sold\"];",
+									"// Генерируем случайный статус",
+									"const randomStatus = getRandomItemFromArray(statuses);",
+									"// Заполняем переменные окружения",
+									"pm.environment.set(\"PET_STATUS\", randomStatus);",
+									"",
+									"",
+									"pm.sendRequest(\"https://petstore.swagger.io/v2/pet/\" + PET_ID, function (err, response) {",
+									"    var getPetJson = response.json();",
+									"    console.log(getPetJson);",
+									"    pm.test(\"Check\", function() {",
+									"        pm.expect(getPetJson.message).to.eql(\"Pet not found\");",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": {{PET_ID}},\n    \"category\": {\n        \"id\": {{PET_CATEGORY_ID}},\n        \"name\": \"{{PET_CATEGORY_NAME}}\"\n    },\n    \"name\": \"{{PET_NAME}}\",\n    \"photoUrls\": [\n        \"{{PET_photoUrls}}\"\n    ],\n    \"tags\": [\n        {\n            \"id\": {{PET_TAG_ID}},\n            \"name\": \"{{PET_TAG_NAME}}\"\n        }\n    ],\n    \"status\": \"{{PET_STATUS}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BaseURL}}/{{APIforPet}}",
+							"host": [
+								"{{BaseURL}}"
+							],
+							"path": [
+								"{{APIforPet}}"
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": null,
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update an existing pet",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 500ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(500);",
+									"});",
+									"console.log(pm.response);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var PET_ID = pm.variables.replaceIn('{{$randomInt}}');",
+									"var PET_NAME = pm.variables.replaceIn('{{$randomColor}}');",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": {{PET_ID}},\n    \"category\": {\n        \"id\": 0,\n        \"name\": \"string\"\n    },\n    \"name\": \"{{PET_NAME}}\",\n    \"photoUrls\": [\n        \"string\"\n    ],\n    \"tags\": [\n        {\n            \"id\": 0,\n            \"name\": \"string\"\n        }\n    ],\n    \"status\": \"available\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BaseURL}}/{{APIforPet}}",
+							"host": [
+								"{{BaseURL}}"
+							],
+							"path": [
+								"{{APIforPet}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Find pet by id",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 500ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(500);",
+									"});",
+									"console.log(pm.response);",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BaseURL}}/{{APIforPet}}/{{PET_ID}}",
+							"host": [
+								"{{BaseURL}}"
+							],
+							"path": [
+								"{{APIforPet}}",
+								"{{PET_ID}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Find pet by status",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 500ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(500);",
+									"});",
+									"console.log(pm.response);",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BaseURL}}/{{APIforPet}}/findByStatus?status={{PET_STATUS}}",
+							"host": [
+								"{{BaseURL}}"
+							],
+							"path": [
+								"{{APIforPet}}",
+								"findByStatus"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "{{PET_STATUS}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete a pet",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{BaseURL}}/{{APIforPet}}/{{PET_ID}}",
+							"host": [
+								"{{BaseURL}}"
+							],
+							"path": [
+								"{{APIforPet}}",
+								"{{PET_ID}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User CRUD",
+			"item": [
+				{
+					"name": "Add new user to the store",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var USER_ID = Math.floor(Math.random() * 11);",
+									"var USERNAME = pm.variables.replaceIn('{{$randomFirstName}}');",
+									"var USER_firstNAME = pm.variables.replaceIn('{{$randomFirstName}}');",
+									"var USER_lastNAME = pm.variables.replaceIn('{{$randomLastName}}');",
+									"var USER_email = pm.variables.replaceIn('{{$randomEmail}}');",
+									"var USER_password = pm.variables.replaceIn('{{$randomPassword}}');",
+									"var USER_phone = pm.variables.replaceIn('{{$randomPhoneNumber}}');",
+									"var USER_STATUS = pm.variables.replaceIn('{{$randomInt}}');",
+									"",
+									"pm.environment.set(\"USER_ID\", parseInt(USER_ID));",
+									"pm.environment.set(\"USERNAME\", (USERNAME));",
+									"pm.environment.set(\"USER_firstNAME\", (USER_firstNAME));",
+									"pm.environment.set(\"USER_lastNAME\", (USER_lastNAME));",
+									"pm.environment.set(\"USER_email\", (USER_email));",
+									"pm.environment.set(\"USER_password\", (USER_password));",
+									"pm.environment.set(\"USER_phone\", (USER_phone));",
+									"pm.environment.set(\"USER_STATUS\", parseInt(USER_STATUS));",
+									"",
+									"",
+									"// Создаем объект с данными для тела запроса",
+									"var requestBody = {",
+									"  \"id\": pm.environment.get(\"USER_ID\"),",
+									"  \"username\": pm.environment.get(\"USERNAME\"),",
+									"  \"firstName\": pm.environment.get(\"USER_firstNAME\"),",
+									"  \"lastName\": pm.environment.get(\"USER_lastNAME\"),",
+									"  \"email\": pm.environment.get(\"USER_email\"),",
+									"  \"password\": pm.environment.get(\"USER_password\"),",
+									"  \"phone\": pm.environment.get(\"USER_phone\"),",
+									"  \"userStatus\": pm.environment.get(\"USER_STATUS\")",
+									"};",
+									"",
+									"// Преобразуем объект в формат JSON и выводим в консоль",
+									"console.log(\"Тело запроса:\");",
+									"console.log(JSON.stringify(requestBody, null, 2));",
+									"",
+									"// Возвращаем тело запроса, которое будет использовано в самом запросе",
+									"return requestBody;",
+									"",
+									"",
+									"",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 500ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(500);",
+									"});",
+									"console.log(pm.response);",
+									"",
+									"",
+									"",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id\": {{USER_ID}},\n  \"username\": \"{{USERNAME}}\",\n  \"firstName\": \"{{USER_firstNAME}}\",\n  \"lastName\": \"{{USER_lastNAME}}\",\n  \"email\": \"{{USER_email}}\",\n  \"password\": \"{{USER_password}}\",\n  \"phone\": \"{{USER_phone}}\",\n  \"userStatus\": {{USER_STATUS}}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BaseURL}}/{{APIforUser}}",
+							"host": [
+								"{{BaseURL}}"
+							],
+							"path": [
+								"{{APIforUser}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update an existing user",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// var USER_ID = Math.floor(Math.random() * 11);",
+									"// var USERNAME = pm.variables.replaceIn('{{$randomFirstName}}');"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 500ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(500);",
+									"});",
+									"console.log(pm.response);",
+									"",
+									"",
+									"",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id\": {{USER_ID}},\n  \"username\": \"{{USERNAME}}\",\n  \"firstName\": \"{{USER_firstNAME}}\",\n  \"lastName\": \"{{USER_lastNAME}}\",\n  \"email\": \"{{USER_email}}\",\n  \"password\": \"{{USER_password}}\",\n  \"phone\": \"{{USER_phone}}\",\n  \"userStatus\": {{USER_STATUS}}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BaseURL}}/{{APIforUser}}/{{USERNAME}}",
+							"host": [
+								"{{BaseURL}}"
+							],
+							"path": [
+								"{{APIforUser}}",
+								"{{USERNAME}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Find user by username",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 500ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(500);",
+									"});",
+									"console.log(pm.response);",
+									"",
+									"",
+									"",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BaseURL}}/{{APIforUser}}/{{USERNAME}}",
+							"host": [
+								"{{BaseURL}}"
+							],
+							"path": [
+								"{{APIforUser}}",
+								"{{USERNAME}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete a user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 500ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(500);",
+									"});",
+									"console.log(pm.response);",
+									"",
+									"",
+									"",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{BaseURL}}/{{APIforUser}}/{{USER_ID}}",
+							"host": [
+								"{{BaseURL}}"
+							],
+							"path": [
+								"{{APIforUser}}",
+								"{{USER_ID}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Store CRUD",
+			"item": [
+				{
+					"name": "Place an order for a pet",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var ORDER_ID = Math.floor(Math.random() * 11);",
+									"var PET_ID = pm.variables.replaceIn('{{$randomInt}}');",
+									"var GOODS_QUANTITY = pm.variables.replaceIn('{{$randomInt}}');",
+									"var SHIP_DATE = pm.variables.replaceIn('{{$randomDateRecent}}');",
+									"// var ORDER_COMPLETE = pm.variables.replaceIn('{{$$randomBoolean}}'); // какое значение ?",
+									"",
+									"pm.environment.set(\"ORDER_ID\", parseInt(ORDER_ID));",
+									"pm.environment.set(\"PET_ID\", parseInt(PET_ID));",
+									"pm.environment.set(\"GOODS_QUANTITY\", parseInt(GOODS_QUANTITY));",
+									"pm.environment.set(\"SHIP_DATE\", (SHIP_DATE));",
+									"// pm.environment.set(\"ORDER_COMPLETE\", (ORDER_COMPLETE)); // какое значение ?",
+									"",
+									"// Функция для генерации случайного элемента из массива для генерации статуса store",
+									"function getRandomItemFromArray(array) {",
+									"    return array[Math.floor(Math.random() * array.length)];",
+									"}",
+									"// Возможные статусы",
+									"const statuses = [\"placed\", \"not placed\"];",
+									"// Генерируем случайный статус",
+									"const randomStatus = getRandomItemFromArray(statuses);",
+									"// Заполняем переменные окружения",
+									"pm.environment.set(\"STORE_STATUS\", randomStatus);",
+									"",
+									"// Функция для генерации случайного элемента из массива для генерации статуса order complete",
+									"function getRandomItemFromArray(array) {",
+									"    return array[Math.floor(Math.random() * array.length)];",
+									"}",
+									"// Возможные статусы",
+									"const statuses2 = [\"true\", \"false\"];",
+									"// Генерируем случайный статус",
+									"const randomStatus2 = getRandomItemFromArray(statuses2);",
+									"// Заполняем переменные окружения",
+									"pm.environment.set(\"ORDER_COMPLETE\", randomStatus2);",
+									"",
+									"// Создаем объект с данными для тела запроса",
+									"var requestBody = {",
+									"  \"id\": pm.environment.get (\"ORDER_ID\"),",
+									"  \"petId\": pm.environment.get (\"PET_ID\"),",
+									"  \"quantity\": pm.environment.get (\"GOODS_QUANTITY\"),",
+									"  \"shipDate\": pm.environment.get (\"SHIP_DATE\"),",
+									"  \"status\": pm.environment.get (\"STORE_STATUS\"),",
+									"  \"complete\": pm.environment.get (\"ORDER_COMPLETE\")",
+									"};",
+									"// Преобразуем объект в формат JSON и выводим в консоль",
+									"console.log(\"Request body:\");",
+									"console.log(JSON.stringify(requestBody, null, 2));",
+									"",
+									"// Возвращаем тело запроса, которое будет использовано в самом запросе",
+									"return requestBody;"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 500ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(500);",
+									"});",
+									"console.log(pm.response);",
+									"",
+									"",
+									"",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id\": {{ORDER_ID}},\n  \"petId\": {{PET_ID}},\n  \"quantity\": {{GOODS_QUANTITY}},\n  \"shipDate\": \"{{SHIP_DATE}}\",\n  \"status\": \"{{STORE_STATUS}}\",\n  \"complete\": \"{{ORDER_COMPLETE}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BaseURL}}/{{APIforStore}}",
+							"host": [
+								"{{BaseURL}}"
+							],
+							"path": [
+								"{{APIforStore}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Find order by id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 500ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(500);",
+									"});",
+									"console.log(pm.response);",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BaseURL}}/{{APIforStore}}/{{ORDER_ID}}",
+							"host": [
+								"{{BaseURL}}"
+							],
+							"path": [
+								"{{APIforStore}}",
+								"{{ORDER_ID}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete order by id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 500ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(500);",
+									"});",
+									"console.log(pm.response);",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{BaseURL}}/{{APIforStore}}/{{ORDER_ID}}",
+							"host": [
+								"{{BaseURL}}"
+							],
+							"path": [
+								"{{APIforStore}}",
+								"{{ORDER_ID}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
